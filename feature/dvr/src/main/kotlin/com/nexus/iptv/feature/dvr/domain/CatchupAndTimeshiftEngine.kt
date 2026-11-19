@@ -113,7 +113,7 @@ object CatchupAndTimeshiftEngine {
         val durationMin = (durationSec / 60L).coerceAtLeast(1L)
         val offsetSec = (nowSec - startSec).coerceAtLeast(0L)
 
-        val type = channel.catchupType.uppercase(Locale.ROOT)
+        val type = channel.catchupType!!.uppercase(Locale.ROOT)
         val template = channel.catchupSourceTemplate
 
         val resolvedBaseUrl = when (type) {
