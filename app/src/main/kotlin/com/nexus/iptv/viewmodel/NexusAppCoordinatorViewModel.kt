@@ -111,8 +111,8 @@ class NexusAppCoordinatorViewModel @Inject constructor(
     private val _isRunningSpeedtest = MutableStateFlow(false)
     val isRunningSpeedtest: StateFlow<Boolean> = _isRunningSpeedtest.asStateFlow()
 
-    private val _sourceProbes = MutableStateFlow>(emptyMap())
-    val sourceProbes: StateFlow> = _sourceProbes.asStateFlow()
+    private val _sourceProbes = MutableStateFlow(emptyMap<Long, SourceProbeDiagnosticResult>())
+    val sourceProbes = _sourceProbes.asStateFlow()
 
     private val _epgTimelineRows = MutableStateFlow<List<EpgChannelTimelineRow>>(emptyList())
     val epgTimelineRows: StateFlow<List<EpgChannelTimelineRow>> = _epgTimelineRows.asStateFlow()
