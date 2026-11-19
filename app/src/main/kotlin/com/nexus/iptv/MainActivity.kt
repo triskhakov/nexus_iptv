@@ -1,11 +1,10 @@
 package com.nexus.iptv
 
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
@@ -15,10 +14,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.nexus.iptv.core.model.DeviceFormFactor
 import com.nexus.iptv.core.model.NexusDestination
 import com.nexus.iptv.core.player.contract.AspectRatioMode
+import com.nexus.iptv.core.player.contract.PlayerState
 import com.nexus.iptv.core.player.external.ExternalPlayerLauncher
 import com.nexus.iptv.core.player.ui.NexusVideoPlayerOverlay
 import com.nexus.iptv.core.uimobile.dashboard.NexusMobileDashboardScreen
@@ -42,8 +43,6 @@ import com.nexus.iptv.viewmodel.NexusAppCoordinatorViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
 
 @OptIn(UnstableApi::class)
 @AndroidEntryPoint
@@ -115,7 +114,8 @@ class MainActivity : ComponentActivity() {
 
                     NexusDestination.LIVE_TV -> {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            if (isFullscreen && activeChannel != null) {
+                            val currentCh = activeChannel
+                            if (isFullscreen && currentCh != null) {
                                 AndroidView(
                                     factory = { ctx ->
                                         PlayerView(ctx).apply {
@@ -130,11 +130,11 @@ class MainActivity : ComponentActivity() {
                                 )
 
                                 NexusVideoPlayerOverlay(
-                                    channelNumber = activeChannel!!.number,
-                                    channelName = activeChannel!!.name,
-                                    currentProgramTitle = activeChannel!!.currentProgramTitle,
-                                    nextProgramTitle = activeChannel!!.nextProgramTitle,
-                                    programProgress = activeChannel!!.currentProgramProgress,
+                                    channelNumber = currentCh.number,
+                                    channelName = currentCh.name,
+                                    currentProgramTitle = currentCh.currentProgramTitle,
+                                    nextProgramTitle = currentCh.nextProgramTitle,
+                                    programProgress = currentCh.currentProgramProgress,
                                     playerState = playerState,
                                     telemetry = telemetry,
                                     audioTracks = audioTracks,
@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                                     audioDelayMs = audioDelay,
                                     accentColor = accentColor,
                                     onTogglePlayPause = {
-                                        val isPlaying = (playerState as? com.nexus.iptv.core.player.contract.PlayerState.Ready)?.isPlaying == true
+                                        val isPlaying = (playerState as? PlayerState.Ready)?.isPlaying == true
                                         if (isPlaying) coordinator.playerEngine.pause() else coordinator.playerEngine.resume()
                                     },
                                     onCycleAspectRatio = {
@@ -158,10 +158,18 @@ class MainActivity : ComponentActivity() {
                                     onSelectVideoQuality = coordinator.playerEngine::selectVideoQuality,
                                     onAdjustAudioDelay = coordinator.playerEngine::setAudioDelayMs,
                                     onEnterPip = {
-                                        ExternalPlayerLauncher.enterPictureInPicture(this@MainActivity, telemetry.width, telemetry.height)
+                                        ExternalPlayerLauncher.enterPictureInPicture(
+                                            this@MainActivity,
+                                            telemetry.width,
+                                            telemetry.height
+                                        )
                                     },
                                     onOpenExternalPlayer = {
-                                        ExternalPlayerLauncher.launchExternalPlayer(this@MainActivity, activeChannel!!.streamUrl, activeChannel!!.name)
+                                        ExternalPlayerLauncher.launchExternalPlayer(
+                                            this@MainActivity,
+                                            currentCh.streamUrl,
+                                            currentCh.name
+                                        )
                                     }
                                 )
                             }
@@ -169,7 +177,7 @@ class MainActivity : ComponentActivity() {
                             LiveTvSectionScreen(
                                 allChannels = liveChannels,
                                 categories = categories,
-                                activeChannel = activeChannel,
+                                activeChannel = currentCh,
                                 isFullscreenPlayback = isFullscreen,
                                 accentColor = accentColor,
                                 surfaceAlpha = uiPrefs.surfaceAlpha,
@@ -341,10 +349,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (coordinator.selectedDestination.value != NexusDestination.DASHBOARD) {
             coordinator.navigateTo(NexusDestination.DASHBOARD)
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }
