@@ -180,7 +180,6 @@ class NexusAppCoordinatorViewModel @Inject constructor(
 
         viewModelScope.launch {
             liveTvRepository.recordChannelWatched(channel.id)
-            preferencesDataSource.recordLastPlayedChannel(channel.id)
             val entity = nexusDao.getChannelById(channel.id) ?: return@launch
             smartStreamEngine.startSupervisedPlayback(entity, _decoderMode.value)
         }
