@@ -1,5 +1,7 @@
 package com.nexus.iptv
 
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,7 +42,10 @@ import com.nexus.iptv.viewmodel.NexusAppCoordinatorViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 
+@OptIn(UnstableApi::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
