@@ -303,17 +303,10 @@ private fun VodRoute(
     val vodCatalog by coordinator.vodCatalog.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val vodCategories: List<String> = remember(vodCatalog) {
-        val unique = mutableSetOf<String>()
-        for (item in vodCatalog) unique.add(item.categoryName)
-        unique.toList()
+        vodCatalog.map { it.categoryName }.filter { it.isNotBlank() }.distinct()
     }
     val vodGenres: List<String> = remember(vodCatalog) {
-        val unique = mutableSetOf<String>()
-        for (item in vodCatalog) {
-            val g = item.genre
-            if (!g.isNullOrBlank()) unique.add(g)
-        }
-        unique.toList()
+        vodCatalog.mapNotNull { it.genre }.filter { it.isNotBlank() }.distinct()
     }
     VodSectionScreen(
         allVodItems = vodCatalog,
