@@ -26,7 +26,7 @@ data class ParsedSeriesTag(
 
 object VodDomainEngine {
 
-    private val SXX_EXX_REGEX = Regex("(?i)(?:s|сезон\\s*)(\\d{1,2})[\\s._-]*(?:e|ep|серия\\s*)(\\d{1,3})")
+    private val SXX_EXX_REGEX = Regex("(?iu)(?:s|сезон\\s*)(\\d{1,2})[\\s._-]*(?:e|ep|серия\\s*)(\\d{1,3})")
     private val YEAR_REGEX = Regex("\\b(19\\d{2}|20[0-2]\\d)\\b")
     private val EMPTY_BRACKETS_REGEX = Regex("\\(\\s*\\)|\\[\\s*\\]")
     private val TRAILING_PUNCT_REGEX = Regex("[()\\[\\]._\\s-]+$")
