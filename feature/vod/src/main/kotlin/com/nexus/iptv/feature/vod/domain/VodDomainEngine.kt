@@ -51,7 +51,9 @@ object VodDomainEngine {
         val year = YEAR_REGEX.find(rawTitle)?.groupValues?.get(1)?.toIntOrNull()
         val prefixTitle = rawTitle.substring(0, match.range.first)
             .replace(YEAR_REGEX, "")
-            .replace(Regex("[\\(\\)\\[\\]._\\-]+$"), "")
+            .replace(Regex("\\(\\s*\\)|\\[\\s*\\]"), "")
+            .trim()
+            .replace(Regex("[\\(\\)\\[\\]._\\-\\s]+$"), "")
             .trim()
             .ifEmpty { rawTitle.trim() }
 
