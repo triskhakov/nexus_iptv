@@ -16,11 +16,11 @@ class M3uStreamingParserTest {
     @Test
     fun `M3uStreamingParser extracts header EPG, catchup attributes, EXTVLCOPT user-agent and unified group key`() = runTest {
         val sampleM3u = listOf(
-            "#EXTM3U url-tvg="http://epg.provider.com/xmltv.xml.gz, http://backup.epg/tv.xml" catchup="default" catchup-days="7" tvg-shift="+2"",
-            "#EXTINF:-1 tvg-id="disc.sci" tvg-name="Discovery Science" tvg-logo="http://logos.com/disc.png" group-title="Познавательные" catchup="flussonic" catchup-days="5" catchup-source="http://arch.com/{utc}.m3u8" tvg-chno="101",Discovery Science HD",
+            "#EXTM3U url-tvg=\"http://epg.provider.com/xmltv.xml.gz, http://backup.epg/tv.xml\" catchup=\"default\" catchup-days=\"7\" tvg-shift=\"+2\"",
+            "#EXTINF:-1 tvg-id=\"disc.sci\" tvg-name=\"Discovery Science\" tvg-logo=\"http://logos.com/disc.png\" group-title=\"Познавательные\" catchup=\"flussonic\" catchup-days=\"5\" catchup-source=\"http://arch.com/{utc}.m3u8\" tvg-chno=\"101\",Discovery Science HD",
             "#EXTVLCOPT:http-user-agent=CustomPlayer/4.0",
             "http://stream.provider.com/live/101/index.m3u8",
-            "#EXTINF:-1 tvg-id="disc.sci" group-title="Познавательные",Discovery Science FHD [Backup]",
+            "#EXTINF:-1 tvg-id=\"disc.sci\" group-title=\"Познавательные\",Discovery Science FHD [Backup]",
             "#EXTGRP:Документальные",
             "http://backup.provider.com/live/101_fhd/index.m3u8"
         ).joinToString("\n")
