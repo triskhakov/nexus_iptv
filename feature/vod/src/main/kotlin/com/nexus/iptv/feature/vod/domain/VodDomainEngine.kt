@@ -24,41 +24,29 @@ data class ParsedSeriesTag(
     val releaseYear: Int?
 )
 
-/**
- * Доменный движок раздела Movies & Series — VOD (Этап 8, п. 11 ТЗ).
- *
- * Реализует:
- * 1. Автоматическое распознавание фильмов и сериалов (сезонов S01E02 / "Сезон 1 Серия 2" и года выпуска) из M3U и Xtream;
- * 2. Интеллектуальный расчёт сохранения позиции воспроизведения (Auto-Resume):
- *    - Если просмотрено менее 2% или менее 30 секунд — старт с начала (0 мс);
- *    - Если просмотрено >= 93% хронометража — фильм/серия считается полностью просмотренной, позиция сбрасывается в 0 мс;
- *    - Иначе сохраняется точная позиция для возврата к просмотру в 1 клик.
- * 3. Фильтрацию и сортировку по категориям, жанрам, рейтингу, году и истории.
- */
 object VodDomainEngine {
 
     private val SXX_EXX_REGEX = Regex("(?i)(?:s|сезон\\s*)(\\d{1,2})[\\s._-]*(?:e|ep|серия\\s*)(\\d{1,3})")
     private val YEAR_REGEX = Regex("\\b(19\\d{2}|20[0-2]\\d)\\b")
+    private val EMPTY_BRACKETS_REGEX = Regex("\\(\\s*\\)|\\[\\s*\\]")
+    private val TRAILING_PUNCT_REGEX = Regex("[()\\[\\]._\\s-]+$")
 
-    /**
-     * Извлекает номер сезона, номер серии, чистый заголовок сериала и год выхода из названия записи.
-     */
     fun parseSeriesEpisodeFromTitle(rawTitle: String): ParsedSeriesTag? {
         val match = SXX_EXX_REGEX.find(rawTitle) ?: return null
         val season = match.groupValues[1].toIntOrNull() ?: 1
         val episode = match.groupValues[2].toIntOrNull() ?: 1
 
         val year = YEAR_REGEX.find(rawTitle)?.groupValues?.get(1)?.toIntOrNull()
-        val prefixTitle = rawTitle.substring(0, match.range.first)
+        val cleaned = rawTitle.substring(0, match.range.first)
             .replace(YEAR_REGEX, "")
-            .replace(Regex("\\(\\s*\\)|\\[\\s*\\]"), "")
+            .replace(EMPTY_BRACKETS_REGEX, "")
             .trim()
-            .replace(Regex("[\\(\\)\\[\\]._\\-\\s]+$"), "")
+            .replace(TRAILING_PUNCT_REGEX, "")
             .trim()
             .ifEmpty { rawTitle.trim() }
 
         return ParsedSeriesTag(
-            cleanSeriesTitle = prefixTitle,
+            cleanSeriesTitle = cleaned,
             seasonNumber = season,
             episodeNumber = episode,
             releaseYear = year
@@ -69,15 +57,12 @@ object VodDomainEngine {
         return YEAR_REGEX.find(rawTitle)?.groupValues?.get(1)?.toIntOrNull()
     }
 
-    /**
-     * Вычисляет нормализованную позицию сохранения (0L, если фильм только начат или уже досмотрен до финальных титров >= 93%).
-     */
     fun computeSavedResumePosition(positionMs: Long, durationMs: Long): Long {
         if (durationMs <= 0L || positionMs <= 30_000L) return 0L
         val ratio = positionMs.toDouble() / durationMs.toDouble()
         return when {
             ratio < 0.02 -> 0L
-            ratio >= 0.93 -> 0L // Фильм завершён -> сбрасываем прогресс для повторного просмотра
+            ratio >= 0.93 -> 0L
             else -> positionMs
         }
     }
